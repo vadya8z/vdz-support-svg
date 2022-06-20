@@ -44,6 +44,8 @@ register_deactivation_hook( __FILE__, function () {
 add_action( 'admin_init', function (){
 	if(is_admin()){
 		$plugin_data = get_plugin_data(__FILE__);
+		$plugin_slug    = isset( $plugin_data['slug'] ) ? $plugin_data['slug'] : sanitize_title( $plugin_data['Name'] );
+		$plugin_id_attr = $plugin_slug;
 		$plugin_name = isset($plugin_data['Name']) ? $plugin_data['Name'] : ' us';
 		$plugin_dir_name = preg_replace( '|\/(.*)|', '', plugin_basename( __FILE__ ));
 		$handle = 'admin_'.$plugin_dir_name;
@@ -55,7 +57,9 @@ add_action( 'admin_init', function (){
 		}else{
 			$msg .= "Thanks for your time with us! ({$plugin_name}) Have a nice day!";
 		}
-		wp_add_inline_script( $handle, "document.getElementById('deactivate-".esc_attr($plugin_dir_name)."').onclick=function (e){alert('".esc_attr( $msg )."');}" );
+		if(substr_count( $_SERVER['REQUEST_URI'], 'plugins.php')){
+			wp_add_inline_script( $handle, "if(document.getElementById('deactivate-".esc_attr($plugin_id_attr)."')){document.getElementById('deactivate-".esc_attr($plugin_id_attr)."').onclick=function (e){alert('".esc_attr( $msg )."');}}" );
+		}
 	}
 } );
 
